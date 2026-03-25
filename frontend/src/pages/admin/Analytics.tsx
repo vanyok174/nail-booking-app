@@ -82,37 +82,40 @@ export default function Analytics() {
   }, [] as { date: string; label: string; booked: number; completed: number; cancelled: number; revenue: number }[])
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Аналитика</h2>
+    <div className="space-y-6 animate-fade-in">
+      <h2 className="section-title">Аналитика</h2>
 
       {/* Filters */}
       <div className="space-y-3">
-        <select
-          value={selectedMaster}
-          onChange={e => setSelectedMaster(e.target.value)}
-          className="w-full p-3 bg-tg-secondary rounded-lg"
-        >
-          <option value="">Все мастера</option>
-          {masters.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
+        <div className="card p-4">
+          <label className="text-sm text-stone-500 mb-2 block">Мастер</label>
+          <select
+            value={selectedMaster}
+            onChange={e => setSelectedMaster(e.target.value)}
+            className="input"
+          >
+            <option value="">Все мастера</option>
+            {masters.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+        </div>
 
         <div className="flex gap-2">
           {(['7d', '30d', 'month', 'custom'] as PeriodPreset[]).map(preset => (
             <button
               key={preset}
               onClick={() => setPeriodPreset(preset)}
-              className={`px-3 py-2 rounded-lg text-sm ${
+              className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 periodPreset === preset
-                  ? 'bg-tg-button text-tg-button-text'
-                  : 'bg-tg-secondary'
+                  ? 'bg-gradient-to-r from-rose-400 to-rose-300 text-white shadow-lg shadow-rose-200'
+                  : 'bg-white border border-stone-100 text-stone-600'
               }`}
             >
               {preset === '7d' && '7 дней'}
               {preset === '30d' && '30 дней'}
               {preset === 'month' && 'Месяц'}
-              {preset === 'custom' && 'Свой'}
+              {preset === 'custom' && 'Период'}
             </button>
           ))}
         </div>
@@ -123,13 +126,13 @@ export default function Analytics() {
               type="date"
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
-              className="flex-1 p-3 bg-tg-secondary rounded-lg"
+              className="input flex-1"
             />
             <input
               type="date"
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
-              className="flex-1 p-3 bg-tg-secondary rounded-lg"
+              className="input flex-1"
             />
           </div>
         )}
@@ -139,45 +142,83 @@ export default function Analytics() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <p className="text-sm text-tg-hint">Выполнено</p>
-              <p className="text-2xl font-bold text-green-600">{summary.totals.completed_count}</p>
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <span className="text-emerald-500">✓</span>
+                </div>
+                <span className="text-sm text-stone-500">Выполнено</span>
+              </div>
+              <p className="text-3xl font-bold text-stone-800">{summary.totals.completed_count}</p>
             </div>
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <p className="text-sm text-tg-hint">Отменено</p>
-              <p className="text-2xl font-bold text-red-500">{summary.totals.cancelled_count}</p>
+            
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                  <span className="text-red-400">✕</span>
+                </div>
+                <span className="text-sm text-stone-500">Отменено</span>
+              </div>
+              <p className="text-3xl font-bold text-stone-800">{summary.totals.cancelled_count}</p>
             </div>
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <p className="text-sm text-tg-hint">Забронировано</p>
-              <p className="text-2xl font-bold text-blue-500">{summary.totals.booked_count}</p>
+            
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center">
+                  <span className="text-sky-500">📅</span>
+                </div>
+                <span className="text-sm text-stone-500">Активные</span>
+              </div>
+              <p className="text-3xl font-bold text-stone-800">{summary.totals.booked_count}</p>
             </div>
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <p className="text-sm text-tg-hint">Выручка</p>
-              <p className="text-2xl font-bold">{summary.totals.total_revenue.toLocaleString()} ₽</p>
+            
+            <div className="card p-4 bg-gradient-to-br from-rose-50 to-amber-50 border-rose-100">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                  <span>💰</span>
+                </div>
+                <span className="text-sm text-stone-500">Выручка</span>
+              </div>
+              <p className="text-2xl font-bold gradient-text">{summary.totals.total_revenue.toLocaleString()} ₽</p>
             </div>
           </div>
 
           {/* Chart */}
           {chartData.length > 0 && (
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <h3 className="font-semibold mb-4">Записи по дням</h3>
+            <div className="card p-4">
+              <h3 className="font-semibold text-stone-800 mb-4">Записи по дням</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={chartData}>
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip />
-                  <Bar dataKey="completed" stackId="a" fill="#22c55e" name="Выполнено" />
-                  <Bar dataKey="booked" stackId="a" fill="#3b82f6" name="Забронировано" />
-                  <Bar dataKey="cancelled" stackId="a" fill="#ef4444" name="Отменено" />
+                  <XAxis 
+                    dataKey="label" 
+                    tick={{ fontSize: 10, fill: '#78716c' }} 
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 10, fill: '#78716c' }} 
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: '12px', 
+                      border: '1px solid #f5f5f4',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                  />
+                  <Bar dataKey="completed" stackId="a" fill="#86efac" radius={[0, 0, 0, 0]} name="Выполнено" />
+                  <Bar dataKey="booked" stackId="a" fill="#93c5fd" radius={[0, 0, 0, 0]} name="Забронировано" />
+                  <Bar dataKey="cancelled" stackId="a" fill="#fda4af" radius={[4, 4, 0, 0]} name="Отменено" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
 
           {/* By Master */}
-          {summary.by_master.length > 1 && (
-            <div className="bg-tg-secondary rounded-xl p-4">
-              <h3 className="font-semibold mb-4">По мастерам</h3>
+          {summary.by_master.length > 0 && (
+            <div className="card p-4">
+              <h3 className="font-semibold text-stone-800 mb-4">По мастерам</h3>
               <div className="space-y-3">
                 {summary.by_master.map(master => {
                   const total = master.completed_count + master.booked_count + master.cancelled_count
@@ -186,19 +227,27 @@ export default function Analytics() {
                     : 0
 
                   return (
-                    <div key={master.master_id} className="bg-tg-bg rounded-lg p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">{master.master_name}</span>
-                        <span className="text-sm text-tg-hint">{occupancy}% загрузка</span>
+                    <div key={master.master_id} className="card-flat p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-100 to-amber-100 flex items-center justify-center">
+                            👩‍🎨
+                          </div>
+                          <span className="font-medium text-stone-800">{master.master_name}</span>
+                        </div>
+                        <span className="chip chip-rose text-xs">{occupancy}%</span>
                       </div>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-green-600">{master.completed_count} выполн.</span>
-                        <span className="text-blue-500">{master.booked_count} забр.</span>
-                        <span className="text-red-500">{master.cancelled_count} отм.</span>
+                      
+                      <div className="flex gap-4 text-sm mb-3">
+                        <span className="text-emerald-600">✓ {master.completed_count}</span>
+                        <span className="text-sky-500">📅 {master.booked_count}</span>
+                        <span className="text-red-400">✕ {master.cancelled_count}</span>
                       </div>
-                      <p className="text-sm mt-1">
-                        Выручка: <span className="font-semibold">{master.total_revenue.toLocaleString()} ₽</span>
-                      </p>
+                      
+                      <div className="flex justify-between items-center pt-3 border-t border-stone-100">
+                        <span className="text-sm text-stone-500">Выручка</span>
+                        <span className="font-bold gradient-text">{master.total_revenue.toLocaleString()} ₽</span>
+                      </div>
                     </div>
                   )
                 })}
@@ -206,6 +255,12 @@ export default function Analytics() {
             </div>
           )}
         </>
+      )}
+
+      {!summary && (
+        <div className="card p-8 text-center">
+          <p className="text-stone-500">Нет данных за выбранный период</p>
+        </div>
       )}
     </div>
   )

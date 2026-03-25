@@ -98,21 +98,23 @@ export default function AdminSlots() {
 
   const existingSlots = new Map(slots.map(s => [s.time, s]))
 
-  const dateOptions = Array.from({ length: 30 }, (_, i) => {
+  const dateOptions = Array.from({ length: 21 }, (_, i) => {
     const date = addDays(startOfDay(new Date()), i - 7)
     return {
       value: format(date, 'yyyy-MM-dd'),
-      label: format(date, 'd MMM', { locale: ru })
+      label: format(date, 'd', { locale: ru }),
+      dayName: format(date, 'EEE', { locale: ru }),
+      isToday: i === 7
     }
   })
 
-  function getStatusColor(status: string) {
+  function getStatusStyle(status: string) {
     switch (status) {
-      case 'free': return 'bg-green-500'
-      case 'booked': return 'bg-blue-500'
-      case 'completed': return 'bg-gray-400'
-      case 'cancelled': return 'bg-red-400'
-      default: return 'bg-gray-200'
+      case 'free': return 'chip-green'
+      case 'booked': return 'chip-blue'
+      case 'completed': return 'chip-gray'
+      case 'cancelled': return 'chip-rose'
+      default: return 'chip-gray'
     }
   }
 
@@ -132,52 +134,63 @@ export default function AdminSlots() {
     return service?.name || '—'
   }
 
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Управление слотами</h2>
+  const currentMaster = masters.find(m => m.id === selectedMaster)
 
-      {/* Filters */}
-      <div className="space-y-3">
+  return (
+    <div className="space-y-4 animate-fade-in">
+      <h2 className="section-title">Управление слотами</h2>
+
+      {/* Master Select */}
+      <div className="card p-4">
+        <label className="text-sm text-stone-500 mb-2 block">Мастер</label>
         <select
           value={selectedMaster}
           onChange={e => setSelectedMaster(e.target.value)}
-          className="w-full p-3 bg-tg-secondary rounded-lg"
+          className="input"
         >
           <option value="">Выберите мастера</option>
           {masters.map(m => (
             <option key={m.id} value={m.id}>{m.name}</option>
           ))}
         </select>
+      </div>
 
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-          {dateOptions.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setSelectedDate(opt.value)}
-              className={`px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
-                selectedDate === opt.value
-                  ? 'bg-tg-button text-tg-button-text'
-                  : 'bg-tg-secondary'
-              }`}
-            >
+      {/* Date Selector */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
+        {dateOptions.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setSelectedDate(opt.value)}
+            className={`flex-shrink-0 w-12 py-2 rounded-xl text-center transition-all ${
+              selectedDate === opt.value
+                ? 'bg-gradient-to-br from-rose-400 to-rose-300 text-white shadow-lg shadow-rose-200'
+                : opt.isToday 
+                  ? 'card border-rose-200' 
+                  : 'bg-white border border-stone-100'
+            }`}
+          >
+            <p className={`text-xs uppercase ${selectedDate === opt.value ? 'text-white/80' : 'text-stone-400'}`}>
+              {opt.dayName}
+            </p>
+            <p className={`text-lg font-bold ${selectedDate === opt.value ? '' : 'text-stone-800'}`}>
               {opt.label}
-            </button>
-          ))}
-        </div>
+            </p>
+          </button>
+        ))}
       </div>
 
       {selectedMaster && (
         <>
           <div className="flex justify-between items-center">
-            <p className="text-sm text-tg-hint">
-              {format(new Date(selectedDate), 'd MMMM yyyy, EEEE', { locale: ru })}
+            <p className="text-sm text-stone-600">
+              {format(new Date(selectedDate), 'd MMMM, EEEE', { locale: ru })}
             </p>
             <button
               onClick={createAllSlots}
               disabled={loading}
-              className="text-tg-button text-sm"
+              className="btn-ghost text-sm"
             >
-              Создать все слоты
+              + Все слоты
             </button>
           </div>
 
@@ -187,12 +200,12 @@ export default function AdminSlots() {
 
               if (!slot) {
                 return (
-                  <div key={time} className="flex items-center gap-3 p-3 bg-tg-secondary rounded-lg">
-                    <span className="w-14 font-mono">{time}</span>
-                    <span className="flex-1 text-tg-hint">Слот не создан</span>
+                  <div key={time} className="card p-3 flex items-center gap-3">
+                    <span className="w-14 font-mono text-stone-400">{time}</span>
+                    <span className="flex-1 text-stone-300 text-sm">Не создан</span>
                     <button
                       onClick={() => createSlot(time)}
-                      className="text-tg-button text-sm"
+                      className="btn-ghost text-sm py-1"
                     >
                       + Создать
                     </button>
@@ -201,43 +214,43 @@ export default function AdminSlots() {
               }
 
               return (
-                <div key={time} className="p-3 bg-tg-secondary rounded-lg space-y-2">
+                <div key={time} className="card p-3 space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-14 font-mono">{time}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs text-white ${getStatusColor(slot.status)}`}>
+                    <span className="w-14 font-mono font-medium text-stone-800">{time}</span>
+                    <span className={`chip text-xs ${getStatusStyle(slot.status)}`}>
                       {getStatusLabel(slot.status)}
                     </span>
                     {slot.client_name && (
-                      <span className="text-sm">{slot.client_name}</span>
+                      <span className="text-sm text-stone-600">{slot.client_name}</span>
                     )}
                   </div>
 
                   {slot.status === 'booked' && (
-                    <div className="pl-14 text-sm text-tg-hint">
-                      <p>Услуга: {getServiceName(slot.service_id)}</p>
-                      {slot.price_at_booking && <p>Цена: {slot.price_at_booking} ₽</p>}
+                    <div className="pl-14 text-sm text-stone-500 space-y-0.5">
+                      <p>📋 {getServiceName(slot.service_id)}</p>
+                      {slot.price_at_booking && <p>💰 {slot.price_at_booking} ₽</p>}
                     </div>
                   )}
 
-                  <div className="pl-14 flex gap-2">
+                  <div className="pl-14 flex gap-2 flex-wrap">
                     {slot.status === 'free' && (
-                      <button onClick={() => deleteSlot(slot.id)} className="text-red-500 text-xs">
+                      <button onClick={() => deleteSlot(slot.id)} className="text-red-400 text-xs hover:text-red-500">
                         Удалить
                       </button>
                     )}
                     {slot.status === 'booked' && (
                       <>
-                        <button onClick={() => completeSlot(slot.id)} className="text-green-600 text-xs">
-                          Выполнено
+                        <button onClick={() => completeSlot(slot.id)} className="text-emerald-500 text-xs hover:text-emerald-600">
+                          ✓ Выполнено
                         </button>
-                        <button onClick={() => cancelSlot(slot.id)} className="text-orange-500 text-xs">
-                          Отменить
+                        <button onClick={() => cancelSlot(slot.id)} className="text-amber-500 text-xs hover:text-amber-600">
+                          ✕ Отменить
                         </button>
                       </>
                     )}
                     {(slot.status === 'cancelled' || slot.status === 'completed') && (
-                      <button onClick={() => freeSlot(slot.id)} className="text-tg-link text-xs">
-                        Освободить
+                      <button onClick={() => freeSlot(slot.id)} className="text-rose-400 text-xs hover:text-rose-500">
+                        ↻ Освободить
                       </button>
                     )}
                   </div>
@@ -246,6 +259,12 @@ export default function AdminSlots() {
             })}
           </div>
         </>
+      )}
+
+      {!selectedMaster && masters.length === 0 && (
+        <div className="card p-8 text-center">
+          <p className="text-stone-500">Сначала добавьте мастера</p>
+        </div>
       )}
     </div>
   )

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+
+# Database
+backend/data/*.db
+backend/data/*.db-journal
+
+# Uploads (keep folder structure)
+backend/uploads/**/*
+!backend/uploads/.gitkeep
+!backend/uploads/portfolio/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

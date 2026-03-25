@@ -134,8 +134,6 @@ export default function AdminSlots() {
     return service?.name || '—'
   }
 
-  const currentMaster = masters.find(m => m.id === selectedMaster)
-
   return (
     <div className="space-y-4 animate-fade-in">
       <h2 className="section-title">Управление слотами</h2>

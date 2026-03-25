@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../../api/client'
 import { Master, AnalyticsSummary, DailyAnalytics } from '../../api/types'
 
